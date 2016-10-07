@@ -1,0 +1,158 @@
+<project default="usage" basedir="." >
+	
+	<exec executable="git" outputproperty="git.commit.hash" resultproperty="git.return.status" failifexecutionfails="false">
+		<arg line="log -1 --pretty=format:%H" />
+	</exec>
+	
+	<!-- We consider it is a git clone if the property does not contain some error keywords and a return code is given (meaning the executable was found) --> 
+	<condition property="git.clone">
+		<and>
+			<not>
+				<contains string="${git.commit.hash}" substring="fatal"/>
+			</not>
+			<isset property="git.return.status"/>
+		</and>
+	</condition>
+	
+	<tstamp>
+	    <format property="YEAR" pattern="yyyy" />
+	</tstamp>
+	
+	
+	<property file="${basedir}/build.properties"/>
+
+	<!-- =================================================================== -->
+	<!-- Initialization target                                               -->
+	<!-- =================================================================== -->
+
+	<target description="Initialization target" name="init" unless="target.init.done" depends="git.build.number">
+
+		<property name="target.init.done" value="true"/>
+
+		<property name="Name" value="${parsebionet.Name}" />
+		<property name="name" value="${parsebionet.name}" />
+		<property name="version" value="${parsebionet.version}" />
+		<property name="api.version" value="${parsebionet.api.version}" />
+
+		<property name="year" value="${YEAR}" />
+
+		<echo message="-----------   ${Name} ${version} [${year}] ------------" />
+		<echo message="-----------     ${TODAY}   ------------" />
+		<echo message="-----------     ${DSTAMP} ${TSTAMP}  ------------" />
+		<echo message="-----------   git revision ${parsebionet.revision}  ------------" />
+		<echo message="-----------   git url ${parsebionet.url}  ------------" />
+
+		<property environment="env" />
+		<property name="build.compiler" value="modern" />
+		<property name="build.sysclasspath" value="ignore" />
+		<property name="debug" value="on" />
+		<property name="optimize" value="on" />
+		<property name="deprecation" value="false" />
+		<property name="depend" value="true" />
+		<property name="verbose" value="false" />
+
+		<property name="build.time" value="${DSTAMP}-${TSTAMP}" />
+		<property name="build.name" value="${version} (build ${parsebionet.revision}-${build.time})" />
+
+		<property name="src.dir" value="${basedir}/src" />
+		<property name="test.src.dir" value="${basedir}/test" />
+		<property name="build.dir" value="${basedir}/build" />
+		<property name="build.src" value="${basedir}/build/src" />
+		<property name="build.dest" value="${basedir}/build/classes" />
+		<property name="build.javadocs" value="${basedir}/build/apidocs" />
+		<property name="jars.dir" value="${basedir}/core/lib" />
+		<property name="dist.root" value="${basedir}/dist" />
+		<property name="dist.dir" value="${dist.root}/${name}-${version}" />
+
+		<property name="resource.dir" value="${basedir}/resources" />
+
+		<!-- TODO - make something generic for the modules like for the packages -->
+		<!-- <property name="cellDesigner.module.base.dir" value="${basedir}/modules/celldesigner" />
+		<property name="libSBMLio.module.base.dir" value="${basedir}/modules/libSBMLio" />
+		<property name="tidy.module.base.dir" value="${basedir}/modules/tidy" />
+		
+		<property name="core.base.dir" value="${basedir}/core" />
+		<property name="package.names" value="comp distrib arrays dyn fbc groups layout multi qual render req spatial" /> -->
+
+		<filter token="year" value="${year}" />
+		<filter token="version" value="${version}" />
+		<filter token="date" value="${TODAY}" />
+		<filter token="log" value="true" />
+		<filter token="verbose" value="true" />
+
+		<!-- add everything needed to the classpath -->
+		<!-- adjust the settings to your local environment -->
+		<path id="classpath">
+			<fileset dir="${jars.dir}" includes="*.jar *.zip"/>
+			<!--<path location="${core.base.dir}/build/classes"/>-->
+			<fileset dir="${build.dir}" includes="*.jar *.zip"/>
+		</path>
+
+		<!-- add everything to setup tests using the simulation core library -->
+		<!--<property name="simulation.core.dir" value="${basedir}/../simulation-core" />
+		<property name="simulation.core.version" value="1.4" />
+		
+		<property name="sbml-test-cases-2013-01-01" value="${basedir}/../simulation-core/sbml-test-cases-2013-01-01" />-->
+		
+		<!--<path id="simulation.core.classpath">
+			<fileset dir="${simulation.core.dir}/lib" includes="*.jar" excludes="jsbml*"/>
+			<path refid="classpath"/>
+			<fileset dir="${simulation.core.dir}/dist/SimulationCoreLibrary-${simulation.core.version}/" includes="*.jar"/>
+			<fileset dir="${simulation.core.dir}/lib/ext-lib/" includes="*.jar"/> 
+		</path> -->
+		
+		<!-- don't commit the repo url for releases to avoid messing it up as much as possible -->
+		<!-- <property name="maven.repo.url" value="scp://shell.sourceforge.net/home/project-web/jsbml/htdocs/m2repo_snapshots"/> -->
+		<!-- local test instance url file:///homes/maven/public_html/m2repo -->
+		
+	</target>
+	
+	
+	
+	<!-- =================================================================== -->
+	<!-- Help on usage                                                       -->
+	<!-- =================================================================== -->
+	<target name="usage" description="Help on usage" depends="init"	>
+		<echo message="" />
+		<echo message="" />
+		<echo message=" ${Name} Build file" />
+		<echo message=" -------------------------------------------------------------" />
+		<echo message="" />
+		<echo message=" available targets are:" />
+		<echo message="" />
+		<echo message="   jar         --> generates the ${name}.jar file" />
+		<echo message="   test        --> runs the tests" />
+		<echo message="   javadoc     --> generates the API documentation" />
+		<echo message="   clean       --> cleans up the directory" />
+		<echo message="" />
+		<echo message=" See the comments inside the build.xml file for more details." />
+		<echo message=" -------------------------------------------------------------" />
+		<echo message="" />
+		<echo message="" />
+			<!--
+		<echo message="   compile     compiles the source code"/>
+			-->
+	</target>
+		
+
+		<!-- =================================================================== -->
+		<!-- Creating the parsebionet revision and url 						     -->
+		<!-- =================================================================== -->
+		<target
+		   name="git.build.number"
+		   description="Finds out the git build number"
+		   if="git.clone"
+		   unless="svn.checkout"
+		   >
+			<!-- <echo message="It seems to be a git clone"/> -->
+			
+		  <exec executable="git" outputproperty="git.origin.url" failifexecutionfails="false">
+		    <arg line="config --get remote.origin.url" />
+		  </exec>
+
+			<property name="parsebionet.revision" value="${git.commit.hash}" />
+			<property name="parsebionet.url" value="${git.origin.url}" />
+			
+		</target>
+
+</project>
