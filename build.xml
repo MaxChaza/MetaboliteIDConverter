@@ -1,25 +1,26 @@
-<project default="usage" basedir="." >
-	
+<project name="ParseBionet-Enrichment" default="usage" basedir=".">
+
 	<exec executable="git" outputproperty="git.commit.hash" resultproperty="git.return.status" failifexecutionfails="false">
 		<arg line="log -1 --pretty=format:%H" />
 	</exec>
-	
-	<!-- We consider it is a git clone if the property does not contain some error keywords and a return code is given (meaning the executable was found) --> 
+
 	<condition property="git.clone">
 		<and>
 			<not>
-				<contains string="${git.commit.hash}" substring="fatal"/>
+				<contains string="${git.commit.hash}" substring="fatal" />
 			</not>
-			<isset property="git.return.status"/>
+			<isset property="git.return.status" />
 		</and>
 	</condition>
-	
+
 	<tstamp>
-	    <format property="YEAR" pattern="yyyy" />
+		<format property="YEAR" pattern="yyyy" />
 	</tstamp>
-	
-	
-	<property file="${basedir}/build.properties"/>
+
+
+	<property file="${basedir}/build.properties" />
+
+
 
 	<!-- =================================================================== -->
 	<!-- Initialization target                                               -->
@@ -27,7 +28,7 @@
 
 	<target description="Initialization target" name="init" unless="target.init.done" depends="git.build.number">
 
-		<property name="target.init.done" value="true"/>
+		<property name="target.init.done" value="true" />
 
 		<property name="Name" value="${parsebionet.Name}" />
 		<property name="name" value="${parsebionet.name}" />
@@ -36,11 +37,11 @@
 
 		<property name="year" value="${YEAR}" />
 
-		<echo message="-----------   ${Name} ${version} [${year}] ------------" />
-		<echo message="-----------     ${TODAY}   ------------" />
-		<echo message="-----------     ${DSTAMP} ${TSTAMP}  ------------" />
-		<echo message="-----------   git revision ${parsebionet.revision}  ------------" />
-		<echo message="-----------   git url ${parsebionet.url}  ------------" />
+		<echo message="-----------	${Name} ${version} [${year}] ------------" />
+		<echo message="-----------		${TODAY}   ------------" />
+		<echo message="-----------		${DSTAMP} ${TSTAMP}  ------------" />
+		<echo message="-----------	git revision ${parsebionet.revision}  ------------" />
+		<echo message="-----------	git url ${parsebionet.url}  ------------" />
 
 		<property environment="env" />
 		<property name="build.compiler" value="modern" />
@@ -60,19 +61,14 @@
 		<property name="build.src" value="${basedir}/build/src" />
 		<property name="build.dest" value="${basedir}/build/classes" />
 		<property name="build.javadocs" value="${basedir}/build/apidocs" />
-		<property name="jars.dir" value="${basedir}/core/lib" />
+		<property name="jars.dir" value="${basedir}/lib" />
 		<property name="dist.root" value="${basedir}/dist" />
+		<property name="dist.lib.dir" value="${dist.root}/lib" />
 		<property name="dist.dir" value="${dist.root}/${name}-${version}" />
 
 		<property name="resource.dir" value="${basedir}/resources" />
 
-		<!-- TODO - make something generic for the modules like for the packages -->
-		<!-- <property name="cellDesigner.module.base.dir" value="${basedir}/modules/celldesigner" />
-		<property name="libSBMLio.module.base.dir" value="${basedir}/modules/libSBMLio" />
-		<property name="tidy.module.base.dir" value="${basedir}/modules/tidy" />
-		
-		<property name="core.base.dir" value="${basedir}/core" />
-		<property name="package.names" value="comp distrib arrays dyn fbc groups layout multi qual render req spatial" /> -->
+		<property name="main-class" value="parsebionet.enrichment.EnrichMetaboliteIds" />
 
 		<filter token="year" value="${year}" />
 		<filter token="version" value="${version}" />
@@ -80,79 +76,168 @@
 		<filter token="log" value="true" />
 		<filter token="verbose" value="true" />
 
-		<!-- add everything needed to the classpath -->
-		<!-- adjust the settings to your local environment -->
 		<path id="classpath">
-			<fileset dir="${jars.dir}" includes="*.jar *.zip"/>
-			<!--<path location="${core.base.dir}/build/classes"/>-->
-			<fileset dir="${build.dir}" includes="*.jar *.zip"/>
+			<fileset dir="${jars.dir}" includes="*.jar *.zip" />
+			<fileset dir="${build.dir}" includes="*.jar *.zip" />
 		</path>
 
-		<!-- add everything to setup tests using the simulation core library -->
-		<!--<property name="simulation.core.dir" value="${basedir}/../simulation-core" />
-		<property name="simulation.core.version" value="1.4" />
-		
-		<property name="sbml-test-cases-2013-01-01" value="${basedir}/../simulation-core/sbml-test-cases-2013-01-01" />-->
-		
-		<!--<path id="simulation.core.classpath">
-			<fileset dir="${simulation.core.dir}/lib" includes="*.jar" excludes="jsbml*"/>
-			<path refid="classpath"/>
-			<fileset dir="${simulation.core.dir}/dist/SimulationCoreLibrary-${simulation.core.version}/" includes="*.jar"/>
-			<fileset dir="${simulation.core.dir}/lib/ext-lib/" includes="*.jar"/> 
-		</path> -->
-		
-		<!-- don't commit the repo url for releases to avoid messing it up as much as possible -->
-		<!-- <property name="maven.repo.url" value="scp://shell.sourceforge.net/home/project-web/jsbml/htdocs/m2repo_snapshots"/> -->
-		<!-- local test instance url file:///homes/maven/public_html/m2repo -->
-		
 	</target>
-	
-	
-	
+
+
+
 	<!-- =================================================================== -->
 	<!-- Help on usage                                                       -->
 	<!-- =================================================================== -->
-	<target name="usage" description="Help on usage" depends="init"	>
-		<echo message="" />
-		<echo message="" />
-		<echo message=" ${Name} Build file" />
-		<echo message=" -------------------------------------------------------------" />
-		<echo message="" />
-		<echo message=" available targets are:" />
-		<echo message="" />
-		<echo message="   jar         --> generates the ${name}.jar file" />
-		<echo message="   test        --> runs the tests" />
-		<echo message="   javadoc     --> generates the API documentation" />
-		<echo message="   clean       --> cleans up the directory" />
-		<echo message="" />
+	<target name="usage" description="Help on usage" depends="init">
+		<echo message="	${Name} Build file" />
+		<echo message="-------------------------------------------------------------" />
+		<echo message="	available targets are:" />
+		<echo message="		jar         --> generates the ${name}.jar file" />
+		<echo message="		src-jar     --> generates the ${name}.jar file along with the source code" />
+		<!-- 	<echo message="		test         runs the tests" />
+		<echo message="		javadoc      generates the API documentation" />-->
 		<echo message=" See the comments inside the build.xml file for more details." />
 		<echo message=" -------------------------------------------------------------" />
-		<echo message="" />
-		<echo message="" />
-			<!--
-		<echo message="   compile     compiles the source code"/>
-			-->
-	</target>
 		
+	</target>
 
-		<!-- =================================================================== -->
-		<!-- Creating the parsebionet revision and url 						     -->
-		<!-- =================================================================== -->
-		<target
-		   name="git.build.number"
-		   description="Finds out the git build number"
-		   if="git.clone"
-		   unless="svn.checkout"
-		   >
-			<!-- <echo message="It seems to be a git clone"/> -->
-			
-		  <exec executable="git" outputproperty="git.origin.url" failifexecutionfails="false">
-		    <arg line="config --get remote.origin.url" />
-		  </exec>
 
-			<property name="parsebionet.revision" value="${git.commit.hash}" />
-			<property name="parsebionet.url" value="${git.origin.url}" />
-			
-		</target>
+	<!-- =================================================================== -->
+	<!-- Creating the parsebionet revision and url 						     -->
+	<!-- =================================================================== -->
+	<target name="git.build.number" description="Finds out the git build number" if="git.clone">
+
+		<exec executable="git" outputproperty="git.origin.url" failifexecutionfails="false">
+			<arg line="config --get remote.origin.url" />
+		</exec>
+
+		<property name="parsebionet.revision" value="${git.commit.hash}" />
+		<property name="parsebionet.url" value="${git.origin.url}" />
+
+	</target>
+
+
+
+	<!-- =================================================================== -->
+	<!-- Prepares the build directory                                        -->
+	<!-- =================================================================== -->
+	<target name="prepare" description="Prepares the build directory" depends="init" unless="prepare.src.target.done">
+
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${build.dest}" />
+		<mkdir dir="${build.src}" />
+		<echo message="Directories created" />
+	</target>
+
+
+	<!-- =================================================================== -->
+	<!-- Prepares the source code                                            -->
+	<!-- =================================================================== -->
+	<target name="prepare-src" description="Prepares the source code" depends="prepare" unless="prepare.src.target.done">
+
+		<property name="prepare.src.target.done" value="true" />
+
+		<copy todir="${build.src}">
+			<fileset dir="${basedir}/src" includes="**/*" />
+		</copy>
+
+	</target>
+
+
+	<!-- =================================================================== -->
+	<!-- Compiles the src directory                                         -->
+	<!-- =================================================================== -->
+	<target name="compile" description="Compiles the source" depends="prepare">
+		<javac srcdir="${src.dir}" 
+			destdir="${build.dest}" 
+			debug="${debug}" 
+			optimize="${optimize}" 
+			verbose="${verbose}" 
+			source="${parsebionet.build.javac.source}" 
+			target="${parsebionet.build.javac.target}" 
+			classpathref="classpath">
+		</javac>
+	</target>
+
+
+	<!-- =================================================================== -->
+	<!-- Creates the class package and include all the dependencies jars     -->
+	<!-- =================================================================== -->
+	<target name="copy-dependencies">
+
+		<mkdir dir="${dist.lib.dir}" />
+
+		<jar jarfile="${dist.lib.dir}/dependencies-all.jar">
+			<zipgroupfileset dir="${jars.dir}">
+				<include name="**/*.jar" />
+			</zipgroupfileset>
+		</jar>
+
+	</target>
+
+
+
+
+	<!-- =================================================================== -->
+	<!-- Creates the class package and include all the dependencies jars     -->
+	<!-- =================================================================== -->
+	<target name="jar" description="Creates the class package and includes all the dependencies jars into a big jsbml jar file" depends="compile, copy-dependencies">
+		<jar jarfile="${dist.dir}/${name}-${version}.jar" basedir="${build.dest}" includes="**/*.class" index="true">
+			<manifest>
+				<attribute name="Main-Class" value="${main-class}" />
+			</manifest>
+			<zipfileset src="${dist.lib.dir}/dependencies-all.jar" excludes="META-INF/*.SF" />
+		</jar>
+
+		<ant dir="${basedir}" >
+			<target name="clean-up" />
+		</ant>
+
+	</target>
+
+
+
+	<!-- =================================================================== -->
+	<!-- Creates the class package and include all the dependencies jars     -->
+	<!-- =================================================================== -->
+	<target name="src-jar" 
+		description="Creates the class package and includes all the dependencies jars into a big jsbml jar file" 
+		depends="compile, copy-dependencies, prepare-src">
+
+		<jar jarfile="${dist.dir}/${name}-${version}-with-src.jar" 
+			filesetmanifest="mergewithoutmain" 
+			duplicate="preserve" basedir="${build.dest}" 
+			index="true">
+
+			<!-- we use the ${build.src} to include the sources in the resulting jar -->
+			<fileset dir="${build.src}" />
+			<!-- all the dependencies jars -->
+			<zipfileset src="${dist.lib.dir}/dependencies-all.jar" excludes="META-INF/*.SF" />
+
+			<manifest>
+				<attribute name="Main-Class" value="${main-class}" />
+			</manifest>
+
+		</jar>
+
+		<ant dir="${basedir}">
+			<target name="clean-up" />
+		</ant>
+
+	</target>
+
+
+	<!-- =================================================================== -->
+	<!-- Cleans the directory after the jar creation					     -->
+	<!-- =================================================================== -->
+	<target name="clean-up" description="Cleans the build directory" >
+
+		<delete includeEmptyDirs="true" >
+			<fileset dir="${build.dest}" includes="**/*" />
+			<fileset dir="${build.src}" includes="**/*" />
+		</delete>
+		<delete dir="${dist.lib.dir}" includeEmptyDirs="true" >
+		</delete>
+	</target>
 
 </project>
