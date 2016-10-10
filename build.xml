@@ -40,7 +40,7 @@
 		<echo message="-----------	${Name} ${version} [${year}] ------------" />
 		<echo message="-----------		${TODAY}   ------------" />
 		<echo message="-----------		${DSTAMP} ${TSTAMP}  ------------" />
-		<echo message="-----------	git revision ${parsebionet.revision}  ------------" />
+		<echo message="-----------	git hash ${parsebionet.revision}  ------------" />
 		<echo message="-----------	git url ${parsebionet.url}  ------------" />
 
 		<property environment="env" />
