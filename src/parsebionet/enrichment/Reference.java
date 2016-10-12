@@ -51,4 +51,7 @@ public class Reference implements Comparator<Reference>,Comparable<Reference>{
 	public int getConfidenceLevel() {
 		return confidenceLevel;
 	}
+	public void setConfidenceLevel(int i) {
+		this.confidenceLevel=i;
+	}
 }

@@ -43,28 +43,36 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
-import parsebionet.enrichment.checker.CheckReference;
 
 
 /**
- * @author frainay
+ * @author bmerlet adapted from frainay
  * 16-04-2014
  * expand references to remote database using CDK, converting ids between several db
  *  
  */
-@SuppressWarnings("unchecked")
+@Deprecated
 public class ExtendReference {
 
-
+	private boolean check=true;
 	private HashMap<String, Set<Reference>> refs = null;
 
 	public ExtendReference() {
 		this.refs=new HashMap<String, Set<Reference>>();
 	}
 
+	public ExtendReference(boolean c) {
+		this.refs=new HashMap<String, Set<Reference>>();
+		this.check=c;
+	}
 
 	public ExtendReference(HashMap<String,Set<Reference>> refs) {
 		this.setRefs(refs);
+	}
+
+	public ExtendReference(HashMap<String,Set<Reference>> refs, boolean c) {
+		this.setRefs(refs);
+		this.check=c;
 	}
 
 	/**
@@ -77,43 +85,46 @@ public class ExtendReference {
 		for(Reference ref : refs){
 			String id=ref.getId();
 			String dbIn=ref.getDbName();
-			
+
 			if(IdsConvertor.IDENTIFIER_TO_CDK.containsKey(dbIn)){
 				String CdkDbIn=IdsConvertor.IDENTIFIER_TO_CDK.get(dbIn);				
 
 				for(String CdkDbOut : IdsConvertor.CDK_TO_IDENTIFIER.keySet()){
 					String dbOut=IdsConvertor.CDK_TO_IDENTIFIER.get(CdkDbOut);
-//					
-					if(!( dbIn.equalsIgnoreCase(dbOut) )){
-//						
+					//					
+					if(!( dbIn.equals(dbOut) )){
+						//						
 						IdsConvertor idc = new IdsConvertor(CdkDbIn,id,CdkDbOut);
 						ArrayList<Object> res = (ArrayList<Object>)idc.get();
 						if(res != null && !res.isEmpty()){
 							int confidenceLevel = 4;
-							
+
 							for(Object resId:res){
 								if(!this.hasRef(dbOut, (String)resId)){
 									Reference newRef = new Reference( dbOut, (String)resId, confidenceLevel);
-//									if( CheckReference.SUPPORTED_DB.contains(dbOut)){
-//										CheckReference check = new CheckReference(newRef, (BioPhysicalEntity)e);
-//										if(check.getFlag()){
-//											newRef.setConfidenceLevel(check.getConfidenceLevel());
-//											e.addRef(newRef);count++;
-//										}
-//									}else{
-										this.addRef(newRef);
-										count++;
-//									}
+									//									if( CheckReference.SUPPORTED_DB.contains(dbOut)){
+									//										CheckReference check = new CheckReference(newRef, (BioPhysicalEntity)e);
+									//										if(check.getFlag()){
+									//											newRef.setConfidenceLevel(check.getConfidenceLevel());
+									//											e.addRef(newRef);count++;
+									//										}
+									//									}else{
+									this.addRef(newRef);
+									count++;
+									//									}
 								}	
 							}
 						}
 					}
 				}
+
 				
-				count+=this.addInchiRefs();
-				count+=this.addInchiKeyRefs();
 			}	
 		}
+		
+		count+=this.addInchiRefs();
+		count+=this.addInchiKeyRefs();
+		
 		return count;
 	}
 
@@ -127,37 +138,37 @@ public class ExtendReference {
 		for(Reference ref : refs){
 			String id=ref.getId();
 			String dbIn=ref.getDbName();
-			
+
 			if(IdsConvertor.IDENTIFIER_TO_CDK.containsKey(dbIn)){
 				String CdkDbIn=IdsConvertor.IDENTIFIER_TO_CDK.get(dbIn);				
 
 				for(String dbOut : targetDbList){
-					
+
 					if(dbOut.equalsIgnoreCase("inchi")){
 						count+=this.addInchiRefs();
 					}else if(dbOut.equalsIgnoreCase("inchikey")){
 						count+=this.addInchiKeyRefs();							
 					}else if(!(dbIn.equals(dbOut))){
-						
+
 						String CdkDbOut=IdsConvertor.IDENTIFIER_TO_CDK.get(dbOut);
 						IdsConvertor idc = new IdsConvertor(CdkDbIn,id,CdkDbOut);
 						ArrayList<Object> res = (ArrayList<Object>)idc.get();
 						if(res != null && !res.isEmpty()){
 							int confidenceLevel = 4;
-							
+
 							for(Object resId:res){
 								if(!this.hasRef(dbOut, (String)resId)){
 									Reference newRef = new Reference(dbOut, (String)resId, confidenceLevel);
-//									if(e.getClass().equals(BioPhysicalEntity.class) && CheckRef.SUPPORTED_DB.contains(dbOut)){
-//										CheckRef check = new CheckRef(newRef, (BioPhysicalEntity)e);
-//										if(check.getFlag()){
-//											ref.setConfidenceLevel(check.getConfidenceLevel());
-//											e.addRef(newRef);count++;
-//										}
-//									}else{
-										this.addRef(newRef);
-										count++;
-//									}
+									//									if(e.getClass().equals(BioPhysicalEntity.class) && CheckRef.SUPPORTED_DB.contains(dbOut)){
+									//										CheckRef check = new CheckRef(newRef, (BioPhysicalEntity)e);
+									//										if(check.getFlag()){
+									//											ref.setConfidenceLevel(check.getConfidenceLevel());
+									//											e.addRef(newRef);count++;
+									//										}
+									//									}else{
+									this.addRef(newRef);
+									count++;
+									//									}
 								}	
 							}
 						} 
@@ -169,59 +180,44 @@ public class ExtendReference {
 
 	}
 
+
 	/**
-	 * add cross references to DB listed in argument
+	 * create cross link from name
 	 */
-//	public int extendAll(String targetDb){
-//		int count=0;
-////		if(IdsConvertor.IDENTIFIER_TO_CDK.containsKey(targetDb)){
-////			String dbOut = targetDb;
-////			String CdkDbOut=IdsConvertor.IDENTIFIER_TO_CDK.get(dbOut);
-////
-////			ArrayList<Reference> refs = getOrderedRefsList();
-////
-////			for(Reference ref : refs){
-////				String dbIn=ref.getDbName();
-////				String id=ref.getId();
-////				//				System.out.println(id+" ("+dbIn+")");
-////				if(IdsConvertor.IDENTIFIER_TO_CDK.containsKey(dbIn)){
-////					String CdkDbIn=IdsConvertor.IDENTIFIER_TO_CDK.get(dbIn);				
-////
-////
-////					IdsConvertor idc = new IdsConvertor(CdkDbIn,id,CdkDbOut);
-////					ArrayList<Object> res = (ArrayList<Object>)idc.get();
-////					if(res != null && !res.isEmpty()){
-////						int confidenceLevel = 4;
-////						//						if(ref.getConfidenceLevel()==1){
-////						//							confidenceLevel = 2;
-////						//						}else{
-////						//							confidenceLevel = 3;
-////						//						}
-////						for(Object resId:res){
-////							if(!e.hasRef(dbOut, (String)resId)){
-////								Reference newRef = new Reference("Inferred from id", dbOut, (String)resId, confidenceLevel);
-////								if(e.getClass().equals(BioPhysicalEntity.class) && CheckRef.SUPPORTED_DB.contains(dbOut)){
-////									CheckRef check = new CheckRef(newRef, (BioPhysicalEntity)e);
-////									if(check.getFlag()){
-////										ref.setConfidenceLevel(check.getConfidenceLevel());
-////										this.addRef(newRef);count++;
-////									}
-////								}else{
-////									e.addRef(newRef);count++;
-////								}
-////							}	
-////						}
-////					}
-////				}
-////			}
-////		}
-//		return count;
-//	}
+	public int extendFromName(String name){
+		int count=0;
+		for(String CdkDbOut : IdsConvertor.CDK_TO_IDENTIFIER.keySet()){
+			String dbOut=IdsConvertor.CDK_TO_IDENTIFIER.get(CdkDbOut);
+
+			IdsConvertor idc = new IdsConvertor("Chemical Name",name,CdkDbOut);
+			ArrayList<Object> res = (ArrayList<Object>)idc.get();
+			if(res != null && !res.isEmpty()){
+				for(Object resId:res){
+					if(!this.hasRef(dbOut, (String)resId)){
+						Reference ref = new Reference( dbOut,(String)resId, 4);
+						//							if( CheckReference.SUPPORTED_DB.contains(dbOut)){
+						//								CheckReference check = new CheckReference(ref, (BioPhysicalEntity)e);
+						//								if(check.getFlag()){
+						//									ref.setConfidenceLevel(check.getConfidenceLevel());
+						//									e.addRef(ref);count++;
+						//								}
+						//							}else{
+						this.addRef(ref);
+						count++;
+						//							}
+					}	
+				}
+			}
+		}
+		return count;
+	}
+
 
 	/**
 	 * add cross references from existing ones and newly added ones, until all supported DB is referenced or no more links can be added
 	 * @return 
 	 */
+
 	public int extendUntilComplete(){
 		int count=0;
 		Stack<Reference> stack = new Stack<Reference>();
@@ -231,37 +227,34 @@ public class ExtendReference {
 		}
 
 		boolean full = false;
-//		while (!stack.isEmpty() && !full){
-//			full=true;
-//			for(String db : IdsConvertor.CDK_TO_IDENTIFIER.keySet()){
-//				if(!this.getRefs().containsKey(db)){
-//					full = false;
-//				}
-//			}
-//
-//			Reference ref=stack.pop();
-//			String id=ref.getId();
-//			String dbIn=ref.getDbName();
-//
-//			if(IdsConvertor.IDENTIFIER_TO_CDK.containsKey(dbIn)){
-//				String CdkDbIn=IdsConvertor.IDENTIFIER_TO_CDK.get(dbIn);				
-//
-//				for(String CdkDbOut : IdsConvertor.CDK_TO_IDENTIFIER.keySet()){
-//					String dbOut=IdsConvertor.CDK_TO_IDENTIFIER.get(CdkDbOut);
-//					if(!(dbIn.equals(dbOut) || (onlyEmpty && this.getRefs().keySet().contains(dbOut)))){
-//
-//						IdsConvertor idc = new IdsConvertor(CdkDbIn,id,CdkDbOut);
-//						ArrayList<Object> res = (ArrayList<Object>)idc.get();
-//						if(res != null && !res.isEmpty()){
-//							int confidenceLevel = 4;
-//							//							if(ref.getConfidenceLevel()==1){
-//							//								confidenceLevel = 2;
-//							//							}else{
-//							//								confidenceLevel = 3;
-//							//							}
-//							for(Object resId:res){
-//								if(!this.hasRef(dbOut,(String)resId)){
-//									Reference newRef = new Reference("Inferred from id", dbOut, (String)resId, confidenceLevel);
+		while (!stack.isEmpty() && !full){
+
+			full=true;
+			for(String db : IdsConvertor.CDK_TO_IDENTIFIER.keySet()){
+				if(!this.getRefs().containsKey(db)){
+					full = false;
+				}
+			}
+
+			Reference ref=stack.pop();
+			String id=ref.getId();
+			String dbIn=ref.getDbName();
+
+			if(IdsConvertor.IDENTIFIER_TO_CDK.containsKey(dbIn)){
+				String CdkDbIn=IdsConvertor.IDENTIFIER_TO_CDK.get(dbIn);				
+
+				for(String CdkDbOut : IdsConvertor.CDK_TO_IDENTIFIER.keySet()){
+					String dbOut=IdsConvertor.CDK_TO_IDENTIFIER.get(CdkDbOut);
+					if( !dbIn.equals(dbOut) ){
+
+						IdsConvertor idc = new IdsConvertor(CdkDbIn,id,CdkDbOut);
+						ArrayList<Object> res = (ArrayList<Object>)idc.get();
+						if(res != null && !res.isEmpty()){
+							int confidenceLevel = 4;
+							
+							for(Object resId:res){
+								if(!this.hasRef(dbOut,(String)resId)){
+									Reference newRef = new Reference(dbOut, (String)resId, confidenceLevel);
 //									boolean flag=true;
 //									if(e.getClass().equals(BioPhysicalEntity.class) && CheckRef.SUPPORTED_DB.contains(dbOut)){
 //										CheckRef check = new CheckRef(newRef, (BioPhysicalEntity)e);
@@ -271,59 +264,30 @@ public class ExtendReference {
 //											stack.push(newRef);
 //										}
 //									}else{
-//										e.addRef(newRef);count++;
-//										stack.push(newRef);
+										this.addRef(newRef);
+										count++;
+										stack.push(newRef);
 //									}
-//
-//								}	
-//							}
-//						}
-//					}
-//				}
-//
-//			}	
-//		}
+
+								}	
+							}
+						}
+					}
+				}
+
+			}	
+		}
+		
+		count+=this.addInchiRefs();
+		count+=this.addInchiKeyRefs();
+		
 		return count;
 	}
 
-	/**
-	 * create cross link from name
-	 */
-	public int extendFromName(String name){
-		int count=0;
-//		for(String CdkDbOut : IdsConvertor.CDK_TO_IDENTIFIER.keySet()){
-//			String dbOut=IdsConvertor.CDK_TO_IDENTIFIER.get(CdkDbOut);
-//			if(!(onlyEmpty && e.getRefs().keySet().contains(dbOut))){
-//				//				System.out.println("\t"+dbOut);
-//				//				String CdkDbOut=IdsConvertor.IDENTIFIER_TO_CDK.get(dbOut);
-//				IdsConvertor idc = new IdsConvertor("Chemical Name",name,CdkDbOut);
-//				ArrayList<Object> res = (ArrayList<Object>)idc.get();
-//				if(res != null && !res.isEmpty()){
-//					for(Object resId:res){
-//						if(!e.hasRef(dbOut, (String)resId)){
-//							Reference ref = new Reference( dbOut,(String)resId, 4);
-//							if( CheckReference.SUPPORTED_DB.contains(dbOut)){
-//								CheckReference check = new CheckReference(ref, (BioPhysicalEntity)e);
-//								if(check.getFlag()){
-//									ref.setConfidenceLevel(check.getConfidenceLevel());
-//									e.addRef(ref);count++;
-//								}
-//							}else{
-//								e.addRef(ref);count++;
-//							}
-//						}	
-//					}
-//				}
-//			}
-//		}
-		return count;
-	}
-
-	
 	/**
 	 * Get inchi as indentifier.org ref
 	 */
-	
+
 	public int addInchiRefs(){
 		int added=0;
 		ArrayList<Reference> refs = getOrderedRefsList();
@@ -334,7 +298,7 @@ public class ExtendReference {
 			IdsConvertor idc = new IdsConvertor(IdsConvertor.IDENTIFIER_TO_CDK.get(ref.getDbName()),ref.getId(),"InChI Code");
 			ArrayList<Object> res = (ArrayList<Object>)idc.get();
 			if(res != null && !res.isEmpty()){
-				
+
 				Reference InChIref = new Reference( "inchi",(String)res.get(0), ref.getConfidenceLevel());
 				this.addRef(InChIref); 
 				added=1;
@@ -383,6 +347,14 @@ public class ExtendReference {
 		return refs;
 	}
 
+	public boolean isCheck() {
+		return check;
+	}
+
+	public void setCheck(boolean check) {
+		this.check = check;
+	}
+
 	public HashMap<String,Set<Reference>> getRefs(){
 		return refs;
 	}
@@ -392,7 +364,7 @@ public class ExtendReference {
 	}
 
 	public void addRef(String dbName, String dbId, int confidenceLevel){
-		
+
 		Reference ref = new Reference(dbName, dbId, confidenceLevel);
 		if (this.refs.containsKey(dbName)){
 			refs.get(dbName).add(ref);
@@ -403,7 +375,7 @@ public class ExtendReference {
 		}
 	}
 
-	
+
 	/**
 	 * 
 	 * @param ref
@@ -461,22 +433,34 @@ public class ExtendReference {
 		Reference kegg = new Reference( "kegg.compound", "C14748", 1);
 		map.put("kegg.compound",new HashSet<Reference>());
 		map.get("kegg.compound").add(kegg);
+
+		long startTime = System.nanoTime();
 		System.out.println("extending Xrefs...");
 		ExtendReference exRef = new ExtendReference(map);
 
-//		System.out.println(exRef.extendAll()+" Xrefs added");
-//		System.out.println(exRef.extendAll("chebi")+" Xrefs added");
+				System.out.println(exRef.extendAll()+" Xrefs added");
+		//		System.out.println(exRef.extendAll("chebi")+" Xrefs added");
 
-		String[] s =new String[]{"chemspider","chebi","inchi"};
-		System.out.println(exRef.extendAll(s)+" Xrefs added");
+		//		String[] s =new String[]{"chemspider","chebi","inchi"};
+		//		System.out.println(exRef.extendAll(s)+" Xrefs added");
 
-//		System.out.println(exRef.extendFromName()+" Xrefs added from name");
+		//		System.out.println(exRef.extendFromName()+" Xrefs added from name");
 
 //		System.out.println(exRef.extendFromName("Hydroxyeicosatetraenoic acid")+" Xrefs added from name");
 //		System.out.println(exRef.extendUntilComplete()+" Xrefs added");
 
-//		System.out.println("inchiKey added: "+exRef.addInchiKeyRefs());
-//		System.out.println("inchiKey added: "+exRef.addInchiRefs());
+		//		System.out.println("inchiKey added: "+exRef.addInchiKeyRefs());
+		//		System.out.println("inchiKey added: "+exRef.addInchiRefs());
+
+		long elapsedTime = System.nanoTime() - startTime;
+
+		if (elapsedTime/1000000000==0){
+			System.out.println("Time to retrieve references: "+ elapsedTime/1000000+ " milliseconds");
+		}
+		else{
+			System.out.println("Time to retrieve references: "+ elapsedTime/1000000000+ " seconds");
+		}
+
 
 		for(String db:exRef.getRefs().keySet()){
 			System.out.println(db);

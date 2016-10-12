@@ -5,6 +5,8 @@
 	<classpathentry kind="lib" path="lib/args4j-2.33.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang-2.6.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-all-1.9.11.jar"/>
-	<classpathentry kind="lib" path="lib/chebiWS-client-2.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/jersey-client-1.17.jar"/>
+	<classpathentry kind="lib" path="lib/jersey-core-1.17.jar"/>
+	<classpathentry kind="lib" path="lib/gson-2.7.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
