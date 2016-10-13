@@ -60,7 +60,7 @@ public class ExtendReferenceFromInchiKey {
 	private boolean check=true;
 	private HashMap<String, Set<Reference>> refs = null;
 	private Reference inchiKeyRef;
-	
+
 
 	public ExtendReferenceFromInchiKey() {
 		this.refs=new HashMap<String, Set<Reference>>();
@@ -86,19 +86,19 @@ public class ExtendReferenceFromInchiKey {
 	 */
 	public int findAndExtendFromInChiKey(){
 		int added = 0;
-		
+
 		if (this.getInchiKeyRef()==null){
 			added+=this.addInchiKeyRefs();
 		}
-		
+
 		Reference ref=this.getInchiKeyRef();
-		
+
 		if(ref!=null){
-			IdsConvertor2 idc = new IdsConvertor2(IdsConvertor2.IDENTIFIER_TO_CDK.get(ref.getDbName()), ref.getId(),null);
+			IdsConvertor2 idc = new IdsConvertor2(ref.getDbName(), ref.getId(),null);
 			for(JsonElement j:idc.get()){
-				String outdb=IdsConvertor2.CDK_TO_IDENTIFIER.get(((JsonObject)j).get("dbname").getAsString());
+				String outdb=((JsonObject)j).get("dbname").getAsString();
 				if( ! this.hasRef(outdb, ((JsonObject)j).get("id").getAsString())){
-					
+
 					this.addRef(outdb, ((JsonObject)j).get("id").getAsString(),	1);
 					added++;
 				}else{
@@ -110,7 +110,7 @@ public class ExtendReferenceFromInchiKey {
 		}
 		return added;
 	}
-	
+
 	/**
 	 * Retrieves the inchikey ref from existing ref, then use this inchikey to query cts webservice 
 	 * and only retrieve the targeted databases
@@ -118,21 +118,21 @@ public class ExtendReferenceFromInchiKey {
 	 */
 	public int findAndExtendFromInChiKey(String... targetDbList){
 		int added = 0;
-		
+
 		if (this.getInchiKeyRef()==null){
 			added+=this.addInchiKeyRefs();
 		}
 		HashSet<String> dbSet=new HashSet<String>(Arrays.asList(targetDbList));
-		
+
 		Reference ref;
-		
+
 		if((ref=this.getInchiKeyRef())!=null){
-			IdsConvertor2 idc = new IdsConvertor2(IdsConvertor2.IDENTIFIER_TO_CDK.get(ref.getDbName()), ref.getId(),null);
+			IdsConvertor2 idc = new IdsConvertor2(ref.getDbName(), ref.getId(),null);
 			for(JsonElement j:idc.get()){
-				String outdb=IdsConvertor2.CDK_TO_IDENTIFIER.get(((JsonObject)j).get("dbname").getAsString());
+				String outdb=((JsonObject)j).get("dbname").getAsString();
 				if(dbSet.contains(outdb)
 						&& ! this.hasRef(outdb, ((JsonObject)j).get("id").getAsString())){
-					
+
 					this.addRef(outdb, ((JsonObject)j).get("id").getAsString(),	1);
 					added++;
 				}else if(dbSet.contains(outdb)
@@ -157,27 +157,22 @@ public class ExtendReferenceFromInchiKey {
 			String id=ref.getId();
 			String dbIn=ref.getDbName();
 
-			if(IdsConvertor2.IDENTIFIER_TO_CDK.containsKey(dbIn)){
-				String CdkDbIn=IdsConvertor2.IDENTIFIER_TO_CDK.get(dbIn);				
 
-				for(String CdkDbOut : IdsConvertor2.CDK_TO_IDENTIFIER.keySet()){
-					String dbOut=IdsConvertor2.CDK_TO_IDENTIFIER.get(CdkDbOut);
-					if(!( dbIn.equals(dbOut) )){
-						IdsConvertor2 idc = new IdsConvertor2(CdkDbIn,id,CdkDbOut);
-						for(JsonElement j:idc.get()){
-							int confidenceLevel = 4;
-							if(! this.hasRef(dbOut, ((JsonObject)j).get("id").getAsString())){
-								this.addRef(dbOut, ((JsonObject)j).get("id").getAsString(),	confidenceLevel);
-								count++;
-							}
+			for(String CdkDbOut : IdsConvertor2.USUAL_DB_NAME){
+
+				if(!( dbIn.equals(CdkDbOut) )){
+					IdsConvertor2 idc = new IdsConvertor2(dbIn,id,CdkDbOut);
+					for(JsonElement j:idc.get()){
+						int confidenceLevel = 4;
+						if(! this.hasRef(CdkDbOut, ((JsonObject)j).get("id").getAsString())){
+							this.addRef(CdkDbOut, ((JsonObject)j).get("id").getAsString(),	confidenceLevel);
+							count++;
 						}
 					}
 				}
-
-				
 			}	
 		}
-		
+
 		return count;
 	}
 
@@ -192,22 +187,19 @@ public class ExtendReferenceFromInchiKey {
 			String id=ref.getId();
 			String dbIn=ref.getDbName();
 
-			if(IdsConvertor2.IDENTIFIER_TO_CDK.containsKey(dbIn)){
-				String CdkDbIn=IdsConvertor2.IDENTIFIER_TO_CDK.get(dbIn);				
 
-				for(String dbOut : targetDbList){
 
-					if(!(dbIn.equals(dbOut))){
+			for(String dbOut : targetDbList){
 
-						String CdkDbOut=IdsConvertor2.IDENTIFIER_TO_CDK.get(dbOut);
-						IdsConvertor2 idc = new IdsConvertor2(CdkDbIn,id,CdkDbOut);
-						for(JsonElement j:idc.get()){
-							int confidenceLevel = 4;
+				if(!(dbIn.equals(dbOut)) && IdsConvertor2.USUAL_DB_NAME.contains(dbOut)){
 
-							if(! this.hasRef(dbOut, ((JsonObject)j).get("id").getAsString())){
-								this.addRef(dbOut, ((JsonObject)j).get("id").getAsString(),	confidenceLevel);
-								count++;
-							}
+					IdsConvertor2 idc = new IdsConvertor2(dbIn,id,dbOut);
+					for(JsonElement j:idc.get()){
+						int confidenceLevel = 4;
+
+						if(! this.hasRef(dbOut, ((JsonObject)j).get("id").getAsString())){
+							this.addRef(dbOut, ((JsonObject)j).get("id").getAsString(),	confidenceLevel);
+							count++;
 						}
 					}
 				}
@@ -216,133 +208,7 @@ public class ExtendReferenceFromInchiKey {
 		return count;
 
 	}
-//
-//
-//	/**
-//	 * create cross link from name
-//	 */
-//	public int extendFromName(String name){
-//		int count=0;
-//		for(String CdkDbOut : IdsConvertor.CDK_TO_IDENTIFIER.keySet()){
-//			String dbOut=IdsConvertor.CDK_TO_IDENTIFIER.get(CdkDbOut);
-//
-//			IdsConvertor idc = new IdsConvertor("Chemical Name",name,CdkDbOut);
-//			ArrayList<Object> res = (ArrayList<Object>)idc.get();
-//			if(res != null && !res.isEmpty()){
-//				for(Object resId:res){
-//					if(!this.hasRef(dbOut, (String)resId)){
-//						Reference ref = new Reference( dbOut,(String)resId, 4);
-//						//							if( CheckReference.SUPPORTED_DB.contains(dbOut)){
-//						//								CheckReference check = new CheckReference(ref, (BioPhysicalEntity)e);
-//						//								if(check.getFlag()){
-//						//									ref.setConfidenceLevel(check.getConfidenceLevel());
-//						//									e.addRef(ref);count++;
-//						//								}
-//						//							}else{
-//						this.addRef(ref);
-//						count++;
-//						//							}
-//					}	
-//				}
-//			}
-//		}
-//		return count;
-//	}
-//
-//
-//	/**
-//	 * add cross references from existing ones and newly added ones, until all supported DB is referenced or no more links can be added
-//	 * @return 
-//	 */
-//
-//	public int extendUntilComplete(){
-//		int count=0;
-//		Stack<Reference> stack = new Stack<Reference>();
-//		ArrayList<Reference> refs = getOrderedRefsList();
-//		for(Reference ref : refs){
-//			stack.push(ref);
-//		}
-//
-//		boolean full = false;
-//		while (!stack.isEmpty() && !full){
-//
-//			full=true;
-//			for(String db : IdsConvertor.CDK_TO_IDENTIFIER.keySet()){
-//				if(!this.getRefs().containsKey(db)){
-//					full = false;
-//				}
-//			}
-//
-//			Reference ref=stack.pop();
-//			String id=ref.getId();
-//			String dbIn=ref.getDbName();
-//
-//			if(IdsConvertor.IDENTIFIER_TO_CDK.containsKey(dbIn)){
-//				String CdkDbIn=IdsConvertor.IDENTIFIER_TO_CDK.get(dbIn);				
-//
-//				for(String CdkDbOut : IdsConvertor.CDK_TO_IDENTIFIER.keySet()){
-//					String dbOut=IdsConvertor.CDK_TO_IDENTIFIER.get(CdkDbOut);
-//					if( !dbIn.equals(dbOut) ){
-//
-//						IdsConvertor idc = new IdsConvertor(CdkDbIn,id,CdkDbOut);
-//						ArrayList<Object> res = (ArrayList<Object>)idc.get();
-//						if(res != null && !res.isEmpty()){
-//							int confidenceLevel = 4;
-//							
-//							for(Object resId:res){
-//								if(!this.hasRef(dbOut,(String)resId)){
-//									Reference newRef = new Reference(dbOut, (String)resId, confidenceLevel);
-////									boolean flag=true;
-////									if(e.getClass().equals(BioPhysicalEntity.class) && CheckRef.SUPPORTED_DB.contains(dbOut)){
-////										CheckRef check = new CheckRef(newRef, (BioPhysicalEntity)e);
-////										if(check.getFlag()){
-////											newRef.setConfidenceLevel(check.getConfidenceLevel());
-////											e.addRef(newRef);count++;
-////											stack.push(newRef);
-////										}
-////									}else{
-//										this.addRef(newRef);
-//										count++;
-//										stack.push(newRef);
-////									}
-//
-//								}	
-//							}
-//						}
-//					}
-//				}
-//
-//			}	
-//		}
-//		
-//		count+=this.addInchiRefs();
-//		count+=this.addInchiKeyRefs();
-//		
-//		return count;
-//	}
-//
-//	/**
-//	 * Get inchi as indentifier.org ref
-//	 */
-//
-//	public int addInchiRefs(){
-//		int added=0;
-//		ArrayList<Reference> refs = getOrderedRefsList();
-//		int i=0;
-//		while(this.getRefs().get("inchi")==null && i!=refs.size()){
-//			Reference ref = refs.get(i);
-//			i++;
-//			IdsConvertor idc = new IdsConvertor(IdsConvertor.IDENTIFIER_TO_CDK.get(ref.getDbName()),ref.getId(),"InChI Code");
-//			ArrayList<Object> res = (ArrayList<Object>)idc.get();
-//			if(res != null && !res.isEmpty()){
-//
-//				Reference InChIref = new Reference( "inchi",(String)res.get(0), ref.getConfidenceLevel());
-//				this.addRef(InChIref); 
-//				added=1;
-//			}
-//		}
-//		return added;
-//	}
+	
 
 	/**
 	 * Get inchiKey as indentifier.org ref
@@ -352,26 +218,26 @@ public class ExtendReferenceFromInchiKey {
 		ArrayList<Reference> refs = getOrderedRefsList();
 
 		int i=0;
-		while(this.getRefs().get("inchikey")==null && i!=refs.size()){
+		while(this.getRefs().get("InChIKey")==null && i!=refs.size()){
 			Reference ref = refs.get(i);
 			i++;
-			IdsConvertor2 idc = new IdsConvertor2(IdsConvertor2.IDENTIFIER_TO_CDK.get(ref.getDbName()), ref.getId(),"InChIKey");
+			IdsConvertor2 idc = new IdsConvertor2(ref.getDbName(), ref.getId(),"InChIKey");
 			JsonArray result = idc.get();
-			
+
 			if(result != null && result.size()!=0){
 				JsonObject j=result.get(0).getAsJsonObject();
-				
-				Reference InChIKeyref = new Reference("inchikey",j.get("id").getAsString(),ref.getConfidenceLevel());
+
+				Reference InChIKeyref = new Reference("InChIKey",j.get("id").getAsString(),ref.getConfidenceLevel());
 				this.addRef(InChIKeyref); 
 				this.setInchiKeyRef(InChIKeyref);
-				
+
 				added=1;
 			}
 		}
 
 		return added;
 	}
-	
+
 	/**
 	 * return list of references in order of confidence level
 	 */
@@ -379,11 +245,9 @@ public class ExtendReferenceFromInchiKey {
 
 		ArrayList<Reference> refs = new ArrayList<Reference>();
 		for(String dbName : this.getRefs().keySet()){
-			if(IdsConvertor2.IDENTIFIER_TO_CDK.containsKey(dbName)){
-				for(Reference ref : this.getRefs().get(dbName)){
-					refs.add(ref);
-				}
-			}				
+			for(Reference ref : this.getRefs().get(dbName)){
+				refs.add(ref);
+			}
 		}
 		Collections.sort(refs);
 		return refs;
@@ -412,26 +276,26 @@ public class ExtendReferenceFromInchiKey {
 	public Reference getInchiKeyRef() {
 		if(this.inchiKeyRef!=null){
 			return this.inchiKeyRef;
-		}else if(this.refs==null || this.refs.isEmpty() || !this.refs.containsKey("inchikey")){
+		}else if(this.refs==null || this.refs.isEmpty() || !this.refs.containsKey("InChIKey")){
 			return null;
-		}else if (this.refs.get("inchikey").size()!=1){
+		}else if (this.refs.get("InChIKey").size()!=1){
 			return null;
 		}else{
-			for(Reference r:this.refs.get("inchikey")){
+			for(Reference r:this.refs.get("InChIKey")){
 				this.setInchiKeyRef(r);
 				return r;
 			}
 		}
 		return null;
-		
+
 	}
 
 	public void setInchiKeyRef(Reference inchikeyRef) {
 		this.inchiKeyRef = inchikeyRef;
 	}
-	
+
 	public void setInchiKeyRef(String inchikeyString) {
-		this.inchiKeyRef = new Reference("inchikey", inchikeyString, 1);
+		this.inchiKeyRef = new Reference("InChIKey", inchikeyString, 1);
 	}
 
 	public void addRef(String dbName, String dbId, int confidenceLevel){
@@ -465,7 +329,7 @@ public class ExtendReferenceFromInchiKey {
 		}
 	}
 
-	
+
 	/**
 	 * Retrieves the {@link Reference} object corresponding to the parameters
 	 * @param dbName
@@ -484,7 +348,7 @@ public class ExtendReferenceFromInchiKey {
 		return null;
 	}
 
-	
+
 
 	/**
 	 * 
@@ -521,17 +385,17 @@ public class ExtendReferenceFromInchiKey {
 	public static void main(String[] args){
 		HashMap<String, Set<Reference>> map = new HashMap<String, Set<Reference>>();
 
-		Reference kegg = new Reference( "kegg.compound", "C14748", 1);
-		map.put("kegg.compound",new HashSet<Reference>());
-		map.get("kegg.compound").add(kegg);
+		Reference kegg = new Reference( "KEGG", "C14748", 1);
+		map.put("KEGG",new HashSet<Reference>());
+		map.get("KEGG").add(kegg);
 
 		long startTime = System.nanoTime();
 		System.out.println("extending Xrefs...");
 		ExtendReferenceFromInchiKey exRef = new ExtendReferenceFromInchiKey(map);
 
-		
+
 		System.out.println(exRef.findAndExtendFromInChiKey()+" Xrefs added");
-//				System.out.println(exRef.extendAll()+" Xrefs added");
+		//				System.out.println(exRef.extendAll()+" Xrefs added");
 		//		System.out.println(exRef.extendAll("chebi")+" Xrefs added");
 
 		//		String[] s =new String[]{"chemspider","chebi","inchi"};
@@ -539,8 +403,8 @@ public class ExtendReferenceFromInchiKey {
 
 		//		System.out.println(exRef.extendFromName()+" Xrefs added from name");
 
-//		System.out.println(exRef.extendFromName("Hydroxyeicosatetraenoic acid")+" Xrefs added from name");
-//		System.out.println(exRef.extendUntilComplete()+" Xrefs added");
+		//		System.out.println(exRef.extendFromName("Hydroxyeicosatetraenoic acid")+" Xrefs added from name");
+		//		System.out.println(exRef.extendUntilComplete()+" Xrefs added");
 
 		//		System.out.println("inchiKey added: "+exRef.addInchiKeyRefs());
 		//		System.out.println("inchiKey added: "+exRef.addInchiRefs());

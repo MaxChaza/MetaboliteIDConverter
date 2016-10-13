@@ -1,18 +1,14 @@
 package parsebionet.enrichment;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import parsebionet.enrichment.webservices.CTSWebService;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
-import parsebionet.enrichment.webservices.CTSWebService;
 
 
 public class IdsConvertor2 {
@@ -21,39 +17,22 @@ public class IdsConvertor2 {
 	public String input;
 	public String inputType;
 	public String outputType;
-	public static final Map<String, String> IDENTIFIER_TO_CDK = new HashMap<String, String>(){
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = -2017973929947419381L;
 
-		{
-	        put("chebi","ChEBI");
-	        put("kegg.compound","KEGG");
-	        put("pubchem.substance","Pubchem SID");
-	        put("pubchem.compound","PubChem CID");
-	        put("hmdb","Human Metabolome Database");
-	        put("chemspider","ChemSpider");
-	        put("inchi","InChI Code");
-	        put("inchikey","InChIKey");
-	        put("cas","CAS");
-	    }
-	};
-	public static final Map<String, String> CDK_TO_IDENTIFIER = new HashMap<String, String>(){
+	public static final List<String> USUAL_DB_NAME = new ArrayList<String>(){
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 8827127165719451710L;
 
 		{
-	        put("ChEBI","chebi");
-	        put("KEGG","kegg.compound");
-	        put("PubChem CID","pubchem.compound");
-	        put("Human Metabolome Database","hmdb");
-	        put("ChemSpider","chemspider");
-	        put("InChI Code","inchi");
-	        put("InChIKey","inchikey");
-	        put("CAS","cas");
+	        add("InChIKey");
+	        add("ChEBI");
+	        add("InChI Code");
+	        add("KEGG");
+	        add("PubChem CID");
+	        add("Human Metabolome Database");
+	        add("ChemSpider");
+	        add("CAS");
 	    }
 	};
 		
@@ -120,7 +99,7 @@ public class IdsConvertor2 {
 			
 			String dbname=((JsonObject)j).get("name").getAsString();
 			
-			if(CDK_TO_IDENTIFIER.containsKey(dbname)  ){
+			if(USUAL_DB_NAME.contains(dbname)  ){
 				jo=new JsonObject();
 				
 				jo.addProperty("dbname", ((JsonObject)j).get("name").getAsString());
