@@ -182,7 +182,7 @@
 	<!-- Creates the class package and include all the dependencies jars     -->
 	<!-- =================================================================== -->
 	<target name="jar" description="Creates the class package and includes all the dependencies jars into a big jsbml jar file" depends="compile, copy-dependencies">
-		<jar jarfile="${dist.dir}/${name}-${version}.jar" basedir="${build.dest}" includes="**/*.class" index="true">
+		<jar jarfile="${dist.dir}/${name}.jar" basedir="${build.dest}" includes="**/*.class" index="true">
 			<manifest>
 				<attribute name="Main-Class" value="${main-class}" />
 			</manifest>
@@ -204,7 +204,7 @@
 		description="Creates the class package and includes all the dependencies jars into a big jsbml jar file" 
 		depends="compile, copy-dependencies, prepare-src">
 
-		<jar jarfile="${dist.dir}/${name}-${version}-with-src.jar" 
+		<jar jarfile="${dist.dir}/${name}-with-src.jar" 
 			filesetmanifest="mergewithoutmain" 
 			duplicate="preserve" basedir="${build.dest}" 
 			index="true">
