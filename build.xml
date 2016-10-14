@@ -64,7 +64,7 @@
 		<property name="jars.dir" value="${basedir}/lib" />
 		<property name="dist.root" value="${basedir}/dist" />
 		<property name="dist.lib.dir" value="${dist.root}/lib" />
-		<property name="dist.dir" value="${dist.root}/${name}-${version}" />
+		<property name="dist.dir" value="${dist.root}/${name}" />
 
 		<property name="resource.dir" value="${basedir}/resources" />
 
