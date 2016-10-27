@@ -1,4 +1,4 @@
-package parsebionet.enrichment;
+package phnmnl.enrichment;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -16,7 +16,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.StringArrayOptionHandler;
 
-import parsebionet.enrichment.webservices.CTSWebService;
+import phnmnl.enrichment.webservices.CTSWebService;
 
 public class EnrichMetaboliteIds {
 

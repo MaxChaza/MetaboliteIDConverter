@@ -33,7 +33,7 @@
  * Journal of Chemical Information and Computer Sciences, 43(2), 493–500. doi:10.1021/ci025584y)
  * 
  */
-package parsebionet.enrichment;
+package phnmnl.enrichment;
 
 
 import java.util.ArrayList;

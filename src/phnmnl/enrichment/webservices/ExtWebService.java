@@ -1,4 +1,4 @@
-package parsebionet.enrichment.webservices;
+package phnmnl.enrichment.webservices;
 
 import java.io.StringReader;
 import java.net.URI;

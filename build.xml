@@ -1,4 +1,4 @@
-<project name="ParseBionet-Enrichment" default="usage" basedir=".">
+<project name="phnmnl-Enrichment" default="usage" basedir=".">
 
 	<exec executable="git" outputproperty="git.commit.hash" resultproperty="git.return.status" failifexecutionfails="false">
 		<arg line="log -1 --pretty=format:%H" />
@@ -30,18 +30,18 @@
 
 		<property name="target.init.done" value="true" />
 
-		<property name="Name" value="${parsebionet.Name}" />
-		<property name="name" value="${parsebionet.name}" />
-		<property name="version" value="${parsebionet.version}" />
-		<property name="api.version" value="${parsebionet.api.version}" />
+		<property name="Name" value="${phnmnl.Name}" />
+		<property name="name" value="${phnmnl.name}" />
+		<property name="version" value="${phnmnl.version}" />
+		<property name="api.version" value="${phnmnl.api.version}" />
 
 		<property name="year" value="${YEAR}" />
 
 		<echo message="-----------	${Name} ${version} [${year}] ------------" />
 		<echo message="-----------		${TODAY}   ------------" />
 		<echo message="-----------		${DSTAMP} ${TSTAMP}  ------------" />
-		<echo message="-----------	git hash ${parsebionet.revision}  ------------" />
-		<echo message="-----------	git url ${parsebionet.url}  ------------" />
+		<echo message="-----------	git hash ${phnmnl.revision}  ------------" />
+		<echo message="-----------	git url ${phnmnl.url}  ------------" />
 
 		<property environment="env" />
 		<property name="build.compiler" value="modern" />
@@ -53,7 +53,7 @@
 		<property name="verbose" value="false" />
 
 		<property name="build.time" value="${DSTAMP}-${TSTAMP}" />
-		<property name="build.name" value="${version} (build ${parsebionet.revision}-${build.time})" />
+		<property name="build.name" value="${version} (build ${phnmnl.revision}-${build.time})" />
 
 		<property name="src.dir" value="${basedir}/src" />
 		<property name="test.src.dir" value="${basedir}/test" />
@@ -68,7 +68,7 @@
 
 		<property name="resource.dir" value="${basedir}/resources" />
 
-		<property name="main-class" value="parsebionet.enrichment.EnrichMetaboliteIds" />
+		<property name="main-class" value="phnmnl.enrichment.EnrichMetaboliteIds" />
 
 		<filter token="year" value="${year}" />
 		<filter token="version" value="${version}" />
@@ -103,7 +103,7 @@
 
 
 	<!-- =================================================================== -->
-	<!-- Creating the parsebionet revision and url 						     -->
+	<!-- Creating the phnmnl revision and url 						     -->
 	<!-- =================================================================== -->
 	<target name="git.build.number" description="Finds out the git build number" if="git.clone">
 
@@ -111,8 +111,8 @@
 			<arg line="config --get remote.origin.url" />
 		</exec>
 
-		<property name="parsebionet.revision" value="${git.commit.hash}" />
-		<property name="parsebionet.url" value="${git.origin.url}" />
+		<property name="phnmnl.revision" value="${git.commit.hash}" />
+		<property name="phnmnl.url" value="${git.origin.url}" />
 
 	</target>
 
@@ -153,8 +153,8 @@
 			debug="${debug}" 
 			optimize="${optimize}" 
 			verbose="${verbose}" 
-			source="${parsebionet.build.javac.source}" 
-			target="${parsebionet.build.javac.target}" 
+			source="${phnmnl.build.javac.source}" 
+			target="${phnmnl.build.javac.target}" 
 			classpathref="classpath">
 		</javac>
 	</target>

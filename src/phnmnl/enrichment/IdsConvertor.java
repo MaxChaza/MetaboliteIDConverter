@@ -1,4 +1,4 @@
-package parsebionet.enrichment;
+package phnmnl.enrichment;
 
 import java.io.IOException;
 import java.net.URL;
