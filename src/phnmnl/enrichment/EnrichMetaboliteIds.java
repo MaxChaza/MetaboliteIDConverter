@@ -56,7 +56,6 @@ public class EnrichMetaboliteIds {
 
 		EnrichMetaboliteIds enricher = new EnrichMetaboliteIds();
 
-
 		CmdLineParser parser = new CmdLineParser(enricher);
 
 		try {
