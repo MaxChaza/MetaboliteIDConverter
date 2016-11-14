@@ -2,8 +2,6 @@ package phnmnl.enrichment.webservices;
 
 import java.io.StringReader;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 import javax.ws.rs.core.UriBuilder;
 import javax.xml.parsers.DocumentBuilder;
