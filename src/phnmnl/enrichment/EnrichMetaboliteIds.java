@@ -37,9 +37,14 @@ public class EnrichMetaboliteIds {
 
 	@Option(name="-outFile", usage="[Required] Output file name.", required=true)
 	public String outFile ;
-
+	
+	@Option(name="-networkId", usage="enable retrieval of identifiers from the human metabolic network reconstruction.")
+	public boolean getNetworkId=false;
+	
 	@Option(name="-outDB", handler=StringArrayOptionHandler.class, usage="Output databases to convert to.")
 	public String[] outDB=new String[0];
+	
+	
 
 //	@Option(name="-check", usage="Check identifiers by crossing references between databases. This will take more time.")
 //	public boolean check = false;
@@ -302,5 +307,15 @@ public class EnrichMetaboliteIds {
 
 		System.out.println("OutputFile Written");
 
+	}
+
+
+	public boolean isGetNetworkId() {
+		return getNetworkId;
+	}
+
+
+	public void setGetNetworkId(boolean getNetworkId) {
+		this.getNetworkId = getNetworkId;
 	}
 }
