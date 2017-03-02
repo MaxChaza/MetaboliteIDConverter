@@ -23,6 +23,9 @@ public class EnrichMetaboliteIds {
 	private File oFile;
 
 
+	@Option(name="-h", usage="Prints this help.")
+	public boolean phelp = false;
+	
 	@Option(name="-inFile", usage="Input file in tsv file format.")
 	public String inFile = null;
 	
@@ -60,6 +63,12 @@ public class EnrichMetaboliteIds {
 
 		try {
 			parser.parseArgument(args);
+			
+			if(enricher.phelp){
+				System.out.println("Application Usage:");
+				parser.printUsage(System.out);
+				System.exit(0);
+			}
 
 			if( (enricher.inFile==null && enricher.inId==null) || (enricher.inFile!=null && enricher.inId!=null)){
 				throw new CmdLineException("-inFile and -inId cannot be both set or null at the same time");
@@ -75,12 +84,11 @@ public class EnrichMetaboliteIds {
 			}
 
 		} catch (CmdLineException e) {
-			System.err.println(e.getLocalizedMessage());
-			System.err.println();
-			System.err.println("Application Usage:");
-
-			parser.printUsage(System.err);
-			System.exit(1);
+			
+			System.out.println("Application Usage:");
+			parser.printUsage(System.out);
+			System.exit(0);
+			
 		}
 
 
