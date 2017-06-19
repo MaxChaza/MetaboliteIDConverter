@@ -65,6 +65,8 @@
 		<property name="dist.root" value="${basedir}/dist" />
 		<property name="dist.lib.dir" value="${dist.root}/lib" />
 		<property name="dist.dir" value="${dist.root}/${name}" />
+		
+		<property name="dir.javadocs" value="${basedir}/docs" />
 
 		<property name="resource.dir" value="${basedir}/resources" />
 
@@ -239,5 +241,25 @@
 		<delete dir="${dist.lib.dir}" includeEmptyDirs="true" >
 		</delete>
 	</target>
+	
+	
+	<!-- Create the API documentation -->
+
+		<target name="javadocs" depends="prepare">
+		   <mkdir dir="${dir.javadocs}"/>
+
+		   <javadoc packagenames="*.*"
+		            sourcepath="${src.dir}"
+		            destdir="${dir.javadocs}"
+		   			classpathref="classpath"
+		            author="true"
+		            version="true"
+		            use="true"
+		            windowtitle="${phnmnl.Name} API"
+		            doctitle="&lt;h1&gt;${phnmnl.Name}&lt;/h1&gt;"
+		   />
+
+		</target>
+	
 
 </project>
